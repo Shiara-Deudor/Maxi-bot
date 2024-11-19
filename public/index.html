@@ -180,13 +180,13 @@
       userInput.value = ''; // Clear input field
 
       try {
-        const response = await fetch('/chat', {
+        fetch('https://maxi-bot.vercel.app/api/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ userInput: userMessage }),
-        });
+        })
 
         const data = await response.json();
         const botMessage = data.response;
