@@ -29,27 +29,31 @@ const {
       },
     ];
   
-    const chat = model.startChat({
-      generationConfig,
-      safetySettings,
-      history: [
-        {
-          role: "user",
-          parts: [
-            { text: "You are Maxi, a friendly but professional and loyal assistant who works for Shiara..." } // Add your full user prompt here
+    try { 
+        const chat = model.startChat({
+          generationConfig,
+          safetySettings,
+          history: [
+            {
+              role: "user",
+              parts: [
+                { text: "You are Maxi, a friendly but professional and loyal assistant who works for Shiara..." } // Add your full user prompt here
+              ],
+            },
+            {
+              role: "model",
+              parts: [
+                { text: "Hello there! (´｡• ᵕ •｡) ♡  Nice to meet you! I'm Maxi, Shiara's friendly assistant. What can I do for you today? ٩(◕‿◕)۶\n" }
+              ],
+            },
           ],
-        },
-        {
-          role: "model",
-          parts: [
-            { text: "Hello there! (´｡• ᵕ •｡) ♡  Nice to meet you! I'm Maxi, Shiara's friendly assistant. What can I do for you today? ٩(◕‿◕)۶\n" }
-          ],
-        },
-      ],
-    });
-  
-    const result = await chat.sendMessage(userInput);
-    return result.response.text();
+        });
+        const result = await chat.sendMessage(userInput);
+        return result.response.text();
+    } catch (error) {
+        console.error("Error with generative AI:", error);  // Add this log to track AI-related errors
+        throw error;  // Rethrow error to be handled in the main API handler
+      }
   }
   
   module.exports = async (req, res) => {
