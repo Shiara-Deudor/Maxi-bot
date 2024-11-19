@@ -8,7 +8,7 @@ const {
   
   dotenv.config();
   
-  const MODEL_NAME = "gemini-1.5-pro";
+  const MODEL_NAME = "gemini-1.5-flash";
   const API_KEY = process.env.API_KEY;
   
   async function runChat(userInput) {
