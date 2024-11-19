@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maxi-bot</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f7fc;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    #chat-container {
+      background-color: #ffffff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      height: 500px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #7cb2c5; /* Dark gray for the header */
+      font-weight: bold;
+      letter-spacing: 5px;
+    }
+
+    #chat-history {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      max-height: 400px;
+      padding-right: 10px;
+      padding-left: 10px;
+    }
+
+    /* Message Styling */
+    .user-message,
+    .bot-message {
+      max-width: 80%;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 8px 0;
+      word-wrap: break-word;
+    }
+
+    .user-message {
+      background-color: #f8f8f8; /* Pastel blue for user messages */
+      align-self: flex-end;
+      border: solid 1px #84b1c1;
+    }
+
+    .bot-message {
+      background-color: #e6eff9; /* Lighter pastel blue for bot messages */
+      align-self: flex-start;
+    }
+
+    /* Form Styling */
+    form {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input {
+      flex-grow: 1;
+      padding: 12px;
+      border: 1px solid #d1d1d1; /* Light gray border for input */
+      border-radius: 25px;
+      font-size: 1em;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #84b1c1; /* Focused border with a pastel blue-gray color */
+    }
+
+    button {
+      background-color: #84b1c1; /* Pastel blue-gray for button */
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #6d97b0; /* Slightly darker blue-gray on hover */
+    }
+
+    /* Loader Styling */
+    #loader {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Scrollbar Styling */
+    #chat-history::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #chat-history::-webkit-scrollbar-thumb {
+      background-color: #ccc; /* Light gray for scrollbar thumb */
+      border-radius: 10px;
+    }
+
+    #chat-history::-webkit-scrollbar-thumb:hover {
+      background-color: #aaa; /* Darker gray when hovered */
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5em; /* Adjust header size for smaller screens */
+      }
+
+      #chat-container {
+        width: 90%; /* Full width but with padding for small screens */
+        max-width: none; /* Remove max-width */
+        height: auto; /* Allow container to adjust height */
+      }
+
+      input {
+        font-size: 0.9em; /* Slightly smaller input text */
+      }
+
+      button {
+        font-size: 0.9em; /* Slightly smaller button text */
+        padding: 10px 15px; /* Adjust padding for smaller screens */
+      }
+    }
+
+    @media (max-width: 768px) {
+      #chat-container {
+        width: 80%; /* Slightly smaller width for tablets */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <h1>Maxi-bot</h1>
+    <div id="chat-history"></div>
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="Enter your message" autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+  <div id="loader">
+    <img src="loader.gif" width="100" alt="Loading...">
+  </div>
+
+  <script>
+    const chatHistory = document.getElementById('chat-history');
+    const userInput = document.getElementById('user-input');
+    const form = document.getElementById('chat-form');
+    const loader = document.getElementById('loader');
+
+    async function sendMessage() {
+      const userMessage = userInput.value;
+      userInput.value = ''; // Clear input field
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userInput: userMessage }),
+        });
+
+        const data = await response.json();
+        const botMessage = data.response;
+
+        // Add user message and bot response to chat history
+        chatHistory.innerHTML += `<div class="user-message">${userMessage}</div>`;
+        chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
+
+        // Scroll to the bottom of the chat history
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      } catch (error) {
+        console.error('Error:', error);
+        chatHistory.innerHTML += `<div class="bot-message">Sorry, there was an error processing your message.</div>`;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault(); // Prevent form submission
+      loader.style.display = 'block'; // Show loader
+      sendMessage().finally(() => {
+        loader.style.display = 'none'; // Hide the loader after the message is sent
+      });
+    });
+  </script>
+</body>
+</html>
